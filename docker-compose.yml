@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+
+  api-principal:
+    build: .
+    container_name: api-principal
+    ports:
+      - "8000:8000"
+    networks:
+      - mvpnet
+
+networks:
+  mvpnet:
+    external: true

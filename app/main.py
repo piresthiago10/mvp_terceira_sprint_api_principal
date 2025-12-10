@@ -80,3 +80,142 @@ async def criar_usuario(nome: str, email: str, cep: str):
         raise HTTPException(500, data["errors"])
 
     return data["data"]["createUser"]
+
+@app.get("/usuarios")
+async def listar_usuarios(page: int = 1, per_page: int = 10):
+    query = """
+    query Users($page: Int!, $perPage: Int!) {
+      usersPaginated(page: $page, perPage: $perPage) {
+        items {
+          id
+          nome
+          email
+          address {
+            cep
+            logradouro
+            bairro
+            cidade
+            estado
+          }
+        }
+        page
+        perPage
+        total
+        totalPages
+      }
+    }
+    """
+
+    variables = {
+        "page": page,
+        "perPage": per_page
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            USER_API_URL,
+            json={"query": query, "variables": variables}
+        )
+
+    data = response.json()
+
+    if "errors" in data:
+        raise HTTPException(500, data["errors"])
+
+    return data["data"]["usersPaginated"]
+
+@app.get("/usuarios/{user_id}")
+async def buscar_usuario(user_id: int):
+    query = """
+    query UserById($id: Int!) {
+      userById(id: $id) {
+        id
+        nome
+        email
+        address {
+          cep
+          logradouro
+          bairro
+          cidade
+          estado
+        }
+      }
+    }
+    """
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            USER_API_URL,
+            json={"query": query, "variables": {"id": user_id}}
+        )
+
+    data = response.json()
+
+    if "errors" in data:
+        raise HTTPException(404, "Usuário não encontrado")
+
+    return data["data"]["userById"]
+
+@app.put("/usuarios/{user_id}")
+async def atualizar_usuario(
+    user_id: int,
+    nome: str,
+    email: str
+):
+    mutation = """
+    mutation UpdateUser($id: Int!, $nome: String!, $email: String!) {
+      updateUser(id: $id, nome: $nome, email: $email) {
+        id
+        nome
+        email
+      }
+    }
+    """
+
+    variables = {
+        "id": user_id,
+        "nome": nome,
+        "email": email
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            USER_API_URL,
+            json={"query": mutation, "variables": variables}
+        )
+
+    data = response.json()
+
+    if "errors" in data:
+        raise HTTPException(400, data["errors"])
+
+    return data["data"]["updateUser"]
+
+@app.delete("/usuarios/{user_id}")
+async def deletar_usuario(user_id: int):
+    mutation = """
+    mutation DeleteUser($id: Int!) {
+      deleteUser(id: $id) {
+        id
+        nome
+        email
+      }
+    }
+    """
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            USER_API_URL,
+            json={"query": mutation, "variables": {"id": user_id}}
+        )
+
+    data = response.json()
+
+    if "errors" in data:
+        raise HTTPException(400, data["errors"])
+
+    return {
+        "message": "Usuário removido com sucesso",
+        "usuario_removido": data["data"]["deleteUser"]
+    }
+

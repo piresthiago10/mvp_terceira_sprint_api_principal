@@ -10,7 +10,7 @@ Api que consome api externa de dados de usuários e api ViaCep para validação 
 
 ## Fluxograma da Arquitetura
 
-![Fluxograma da Arquitetura](mvp_terceira_sprint_api_principal/fluxograma mvp3.drawio.png "Fluxograma da Arquitetura")
+![Fluxograma da Arquitetura](fluxograma mvp3.drawio.png "Fluxograma da Arquitetura")
 
 ## Forma de utilizar
 
